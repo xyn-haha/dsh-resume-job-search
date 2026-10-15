@@ -2,6 +2,12 @@
 
 本文件记录本插件的公开变更。版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [0.3.2] - 2026-10-15
+
+### 修复
+
+- `LICENSE` 恢复为**逐字标准 MIT 文本**（去掉版权行以外的衍生说明行），使 GitHub 能正确识别为 MIT 许可：`LICENSE` 里的衍生内容说明会干扰其许可证分类器（实测一直显示 `NOASSERTION / Other`）。上游许可与衍生范围说明完整保留在 `THIRD-PARTY-NOTICES.md`，README 与 CHANGELOG 均指向该文件。
+
 ## [0.3.1] - 2026-10-15
 
 ### 变更
