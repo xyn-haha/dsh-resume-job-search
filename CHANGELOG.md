@@ -2,6 +2,14 @@
 
 本文件记录本插件的公开变更。版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [Unreleased]
+
+### 修复
+
+- **`job-search-intel/SKILL.md` 曾带 UTF-8 BOM**，导致 DSH 无法解析其 frontmatter（文件不再以 `---` 开头），该技能被静默跳过；已另存为 UTF-8 无 BOM。
+- `scripts/validate-skills.mjs` 与 `scripts/privacy-scan.mjs` 增加 BOM 检测，同类问题在 CI 与本地即时报错，不再静默失败。
+- `INSTALL.md` 排错清单补充 BOM 这一高频坑（PowerShell `Set-Content -Encoding UTF8`、部分 Windows 编辑器会写入 BOM）。
+
 ## [0.1.0] - 2026-10-15
 
 ### 新增

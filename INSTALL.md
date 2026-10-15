@@ -93,6 +93,7 @@ New-Item -ItemType Junction -Path "$env:USERPROFILE\.dsh\skills\resume-job-searc
 |---|---|
 | 技能一个都没出现 | 检查是否把 `SKILL.md` 放深了一层（必须 `<根>/<技能名>/SKILL.md`） |
 | 只缺少某一个技能 | 该文件的 frontmatter `name` 不是 kebab-case、`description` 为空，或写了 DSH 不认识的 `allowed-tools`；DSH 会静默跳过，用 `scripts/validate-skills.mjs` 定位 |
+| 技能文件带 BOM 后消失 | **高频坑**：用 PowerShell 5.1 的 `Set-Content -Encoding UTF8`、或某些 Windows 编辑器保存，会写入 UTF-8 BOM，导致文件不再以 `---` 开头、frontmatter 解析失败。请另存为「UTF-8 无 BOM」；`scripts/validate-skills.mjs` 与 `scripts/privacy-scan.mjs` 都会直接报出该问题 |
 | 改了文件但不生效 | 正文编辑下次加载生效；frontmatter/新增文件由监视器捕获，必要时新开会话 |
 | 在 Git 仓库里不生效 | `<项目根>` 取最近 `.git` 祖先目录，把 `.dsh/skills` 放到仓库根 |
 | 方式 C 不生效 | 确认改的是 `cordis.patch.yml` 且 `<PLUGIN_DIR>` 已替换为真实路径；重启 DSH |

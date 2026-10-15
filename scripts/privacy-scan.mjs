@@ -40,12 +40,16 @@ const ID_RE = /(?<!\d)\d{17}[\dXx](?!\d)/g;
 const findings = [];
 
 function scanFile(file) {
-  let text;
+  let buffer;
   try {
-    text = readFileSync(file, 'utf8');
+    buffer = readFileSync(file);
   } catch {
     return;
   }
+  if (buffer.length >= 3 && buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf) {
+    findings.push({ file, lineNo: 1, kind: 'UTF-8 BOM', sample: '另存为「UTF-8 无 BOM」，否则 SKILL.md 会被 DSH 静默跳过' });
+  }
+  const text = buffer.toString('utf8');
   const lines = text.split(/\r?\n/);
   lines.forEach((line, index) => {
     const lineNo = index + 1;

@@ -32,7 +32,12 @@ function fail(skill, message) {
 }
 
 function readFrontmatter(skill, file) {
-  const text = readFileSync(file, 'utf8');
+  const buffer = readFileSync(file);
+  if (buffer.length >= 3 && buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf) {
+    // UTF-8 BOM 会让 DSH 的 frontmatter 解析失败（文件不再以 --- 开头），技能被静默跳过
+    fail(skill, '文件带 UTF-8 BOM；请另存为「UTF-8 无 BOM」，否则 DSH 无法解析 frontmatter');
+  }
+  const text = buffer.toString('utf8');
   const lines = text.split(/\r?\n/);
   if (lines[0]?.trim() !== '---') {
     fail(skill, 'frontmatter 缺失：首行必须是 ---');
@@ -47,10 +52,12 @@ function readFrontmatter(skill, file) {
   if (/^\s*allowed-tools\s*:/m.test(block)) {
     fail(skill, '含 DSH 不支持的 allowed-tools 字段');
   }
+  if (!/^name:\s*\S/m.test(block)) fail(skill, 'frontmatter 缺少 name');
+  if (!/^description:\s*\S/m.test(block) && !/^description:\s*[>|]/m.test(block)) {
+    fail(skill, 'frontmatter 缺少 description');
+  }
   const name = /^name:\s*(.+)$/m.exec(block)?.[1]?.trim();
   const description = /^description:\s*([\s\S]+?)(?=^[a-zA-Z-]+:\s|\Z)/m.exec(`${block}\n`)?.[1]?.trim();
-  if (!name) fail(skill, 'frontmatter 缺少 name');
-  if (!description) fail(skill, 'frontmatter 缺少 description');
   if (name && seen.has(name)) fail(skill, `name 与 ${seen.get(name)} 重复：${name}`);
   if (name) seen.set(name, skill);
   return { name, description, bodyLines: lines.length - end - 1 };
