@@ -8,7 +8,11 @@
 
 - **`job-search-intel/SKILL.md` 曾带 UTF-8 BOM**，导致 DSH 无法解析其 frontmatter（文件不再以 `---` 开头），该技能被静默跳过；已另存为 UTF-8 无 BOM。
 - `scripts/validate-skills.mjs` 与 `scripts/privacy-scan.mjs` 增加 BOM 检测，同类问题在 CI 与本地即时报错，不再静默失败。
-- `INSTALL.md` 排错清单补充 BOM 这一高频坑（PowerShell `Set-Content -Encoding UTF8`、部分 Windows 编辑器会写入 BOM）。
+- `job-evaluation` 正文里过时的交叉引用 `cv-tailoring/SKILL.md` 更正为 `resume-writing/SKILL.md`（frontmatter 流水线列表此前已修正，正文遗漏）。
+
+### 文档
+
+- 安装说明修正为**逐技能建联接**：把整个 `skills/` 目录链成一层会让 `SKILL.md` 深两层，DSH 只扫描技能根目录第一层，因此技能不会被发现。三种方式（工作区逐技能联接 / 用户级逐技能联接 / `customSkillDirs` 直指技能根）均已给出可直接执行的脚本，并在排错清单中补充该现象与 BOM 现象。
 
 ## [0.1.0] - 2026-10-15
 

@@ -42,22 +42,28 @@ This plugin turns that into 8 skills and a fixed pipeline: **fact base → job i
 
 **Option A — bind to one workspace (fastest)**
 
+DSH scans only the first level of a skills root, so link **each skill directory** (the loop below does it):
+
 ```powershell
 git clone https://github.com/YOUR-USERNAME/dsh-resume-job-search.git D:\dsh-plugins\dsh-resume-job-search
-New-Item -ItemType Junction -Path 'D:\your-workspace\.dsh\skills\resume-job-search' `
-         -Target 'D:\dsh-plugins\dsh-resume-job-search\skills'
+$plugin = 'D:\dsh-plugins\dsh-resume-job-search'; $root = 'D:\your-workspace\.dsh\skills'
+New-Item -ItemType Directory -Force -Path $root | Out-Null
+Get-ChildItem -Directory "$plugin\skills" | ForEach-Object {
+  New-Item -ItemType Junction -Path (Join-Path $root $_.Name) -Target $_.FullName | Out-Null
+}
 ```
 
 **Option B — user-level skills dir (all workspaces)**
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/dsh-resume-job-search.git ~/.dsh/skills-src/resume-job-search
-ln -s ~/.dsh/skills-src/resume-job-search/skills ~/.dsh/skills/resume-job-search
+git clone https://github.com/YOUR-USERNAME/dsh-resume-job-search.git ~/dsh-plugins/dsh-resume-job-search
+mkdir -p ~/.dsh/skills
+for d in ~/dsh-plugins/dsh-resume-job-search/skills/*/; do ln -sfn "$d" ~/.dsh/skills/"$(basename "$d")"; done
 ```
 
-**Option C — install as a `dsh` plugin bundle**
+**Option C — install as a `dsh` plugin bundle (`customSkillDirs`, no per-skill links)**
 
-Replace `<PLUGIN_DIR>` in the bundled `cordis.patch.yml` with your clone path and reference it from `$DSH_HOME/profiles/<profile>/cordis.patch.yml` (the `customSkillDirs` field accepts several directories).
+Replace `<PLUGIN_DIR>` in the bundled `cordis.patch.yml` with your clone path and reference it from `$DSH_HOME/profiles/<profile>/cordis.patch.yml`.
 
 > Full steps, verification and troubleshooting: [INSTALL.md](INSTALL.md) (Chinese). English walkthrough: [docs/INSTALL.en.md](docs/INSTALL.en.md).
 

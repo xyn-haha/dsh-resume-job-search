@@ -44,22 +44,28 @@
 
 **方式 A：接入某个工作区（最快）**
 
+DSH 只扫描技能根目录的第一层，所以要**为每个技能建一个联接**（脚本会自动处理）：
+
 ```powershell
 git clone https://github.com/YOUR-USERNAME/dsh-resume-job-search.git D:\dsh-plugins\dsh-resume-job-search
-New-Item -ItemType Junction -Path 'D:\你的工作区\.dsh\skills\resume-job-search' `
-         -Target 'D:\dsh-plugins\dsh-resume-job-search\skills'
+$plugin = 'D:\dsh-plugins\dsh-resume-job-search'; $root = 'D:\你的工作区\.dsh\skills'
+New-Item -ItemType Directory -Force -Path $root | Out-Null
+Get-ChildItem -Directory "$plugin\skills" | ForEach-Object {
+  New-Item -ItemType Junction -Path (Join-Path $root $_.Name) -Target $_.FullName | Out-Null
+}
 ```
 
 **方式 B：接入用户级技能目录（全工作区可用）**
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/dsh-resume-job-search.git ~/.dsh/skills-src/resume-job-search
-ln -s ~/.dsh/skills-src/resume-job-search/skills ~/.dsh/skills/resume-job-search   # macOS/Linux
+git clone https://github.com/YOUR-USERNAME/dsh-resume-job-search.git ~/dsh-plugins/dsh-resume-job-search
+mkdir -p ~/.dsh/skills
+for d in ~/dsh-plugins/dsh-resume-job-search/skills/*/; do ln -sfn "$d" ~/.dsh/skills/"$(basename "$d")"; done
 ```
 
-**方式 C：用 `dsh` 插件方式绑定**
+**方式 C：用 `dsh` 插件方式绑定（`customSkillDirs`，无需逐技能联接）**
 
-仓库自带 `cordis.patch.yml`。把其中的 `<PLUGIN_DIR>` 换成你的克隆路径，然后在 `$DSH_HOME/profiles/<profile>/cordis.patch.yml` 中引用，或直接复制该条目到你的 profile patch 里（`customSkillDirs` 支持多个目录）。
+仓库自带 `cordis.patch.yml`。把其中的 `<PLUGIN_DIR>` 换成你的克隆路径，然后在 `$DSH_HOME/profiles/<profile>/cordis.patch.yml` 中引用该条目，或按 `dsh plugin` 方式安装。
 
 > 详细步骤、验证方法与排错清单见 [INSTALL.md](INSTALL.md)。
 

@@ -18,25 +18,32 @@ Only **one level** is scanned: `<root>/<skill-name>/SKILL.md` or a flat `<root>/
 
 ## Option A — bind to one workspace
 
+DSH scans only the first level of a skills root, so link **each skill directory** (not the whole `skills/` folder):
+
 ```bash
-git clone https://github.com/YOUR-USERNAME/dsh-resume-job-search.git ~/dsh-plugins/dsh-resume-job-search
-mkdir -p ~/your-workspace/.dsh/skills
-ln -s ~/dsh-plugins/dsh-resume-job-search/skills ~/your-workspace/.dsh/skills/resume-job-search
+plugin=~/dsh-plugins/dsh-resume-job-search
+root=~/your-workspace/.dsh/skills
+mkdir -p "$root"
+for d in "$plugin"/skills/*/; do ln -sfn "$d" "$root/$(basename "$d")"; done
 ```
 
 Windows (PowerShell, no admin rights needed):
 
 ```powershell
-New-Item -ItemType Directory -Force -Path 'D:\your-workspace\.dsh\skills' | Out-Null
-New-Item -ItemType Junction -Path 'D:\your-workspace\.dsh\skills\resume-job-search' `
-         -Target 'D:\dsh-plugins\dsh-resume-job-search\skills'
+$plugin = 'D:\dsh-plugins\dsh-resume-job-search'
+$root   = 'D:\your-workspace\.dsh\skills'
+New-Item -ItemType Directory -Force -Path $root | Out-Null
+Get-ChildItem -Directory "$plugin\skills" | ForEach-Object {
+  New-Item -ItemType Junction -Path (Join-Path $root $_.Name) -Target $_.FullName | Out-Null
+}
 ```
 
 ## Option B — user-level skills directory
 
 ```bash
+plugin=~/dsh-plugins/dsh-resume-job-search
 mkdir -p ~/.dsh/skills
-ln -s ~/dsh-plugins/dsh-resume-job-search/skills ~/.dsh/skills/resume-job-search
+for d in "$plugin"/skills/*/; do ln -sfn "$d" ~/.dsh/skills/"$(basename "$d")"; done
 ```
 
 Available to every workspace on this machine.
@@ -77,8 +84,9 @@ Never edit `cordis.yml` (the generated entry list); edit `cordis.patch.yml`.
 
 | Symptom | Cause / fix |
 |---|---|
-| No skills appear | `SKILL.md` is nested one level too deep; it must be `<root>/<skill-name>/SKILL.md` |
+| No skills appear | ① The whole `skills/` folder was linked as one level (`<root>/<name>/skills/<skill>/SKILL.md`), which is two levels too deep — link each skill directory instead, or use Option C; ② `SKILL.md` itself is nested too deep; it must be `<root>/<skill-name>/SKILL.md` |
 | One skill missing | Invalid `name` (not kebab-case), empty `description`, or an unsupported `allowed-tools` field; DSH skips it silently — run `scripts/validate-skills.mjs` |
+| A skill disappeared after editing | The file was saved with a UTF-8 BOM (PowerShell `Set-Content -Encoding UTF8`, some Windows editors), so it no longer starts with `---`. Save as "UTF-8 without BOM"; both bundled scripts detect this |
 | Edits do not show up | Body edits load on next use; new/renamed frontmatter is watched, otherwise open a new session |
 | Nothing inside a Git repo | `<projectRoot>` resolves to the nearest `.git` ancestor — put `.dsh/skills` at the repo root |
 | Option C ineffective | Make sure you edited `cordis.patch.yml` and replaced `<PLUGIN_DIR>`; restart DSH if the patch does not hot-reload |

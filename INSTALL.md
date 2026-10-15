@@ -16,32 +16,48 @@
 
 ## 方式 A：接入某个工作区（推荐）
 
-把本插件的 `skills/` 映射到工作区技能目录：
+DSH 只扫描技能根目录的**第一层**，所以要在工作区技能目录下**为每个技能建一个联接**（不能把整个 `skills/` 目录链成一层，那样 `SKILL.md` 就深了两层，不会被发现）。下面的命令会自动为全部技能建好联接。
+
+**Windows（目录联接，无需管理员权限）**
 
 ```powershell
-# Windows：目录联接，无需管理员权限
-New-Item -ItemType Directory -Force -Path 'D:\你的工作区\.dsh\skills' | Out-Null
-New-Item -ItemType Junction -Path 'D:\你的工作区\.dsh\skills\resume-job-search' `
-         -Target 'D:\dsh-plugins\dsh-resume-job-search\skills'
+$plugin = 'D:\dsh-plugins\dsh-resume-job-search'
+$root   = 'D:\你的工作区\.dsh\skills'
+New-Item -ItemType Directory -Force -Path $root | Out-Null
+Get-ChildItem -Directory "$plugin\skills" | ForEach-Object {
+  New-Item -ItemType Junction -Path (Join-Path $root $_.Name) -Target $_.FullName | Out-Null
+}
+Get-ChildItem $root | Select-Object Name, LinkType, Target   # 自检：应看到 8 个 Junction
 ```
+
+**macOS / Linux（符号链接）**
 
 ```bash
-# macOS / Linux：符号链接
-mkdir -p ~/your-workspace/.dsh/skills
-ln -s ~/dsh-plugins/dsh-resume-job-search/skills ~/your-workspace/.dsh/skills/resume-job-search
+plugin=~/dsh-plugins/dsh-resume-job-search
+root=~/your-workspace/.dsh/skills
+mkdir -p "$root"
+for d in "$plugin"/skills/*/; do ln -sfn "$d" "$root/$(basename "$d")"; done
+ls -l "$root"   # 自检：应看到 8 个链接
 ```
 
-注意：`<项目根>` 定义为包含 `.git` 的最近祖先目录，否则回退到启动 DSH 时的工作目录。因此**在一个 Git 仓库里**启动 DSH 时，`.dsh/skills` 要放在该 Git 仓库根目录，而不是子目录。
+说明：`<项目根>` 定义为包含 `.git` 的最近祖先目录，否则回退到启动 DSH 时的工作目录。因此**在一个 Git 仓库里**启动 DSH 时，`.dsh/skills` 要放在该 Git 仓库根目录，而不是子目录。
 
 ## 方式 B：用户级技能目录（对所有工作区生效）
 
+同样要**逐技能建联接**：
+
 ```powershell
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.dsh\skills" | Out-Null
-New-Item -ItemType Junction -Path "$env:USERPROFILE\.dsh\skills\resume-job-search" `
-         -Target 'D:\dsh-plugins\dsh-resume-job-search\skills'
+$plugin = 'D:\dsh-plugins\dsh-resume-job-search'
+$root   = "$env:USERPROFILE\.dsh\skills"
+New-Item -ItemType Directory -Force -Path $root | Out-Null
+Get-ChildItem -Directory "$plugin\skills" | ForEach-Object {
+  New-Item -ItemType Junction -Path (Join-Path $root $_.Name) -Target $_.FullName | Out-Null
+}
 ```
 
 这样任何工作区启动的 DSH 都能调用这 8 个技能。适合你希望「到处都能用」的场景。
+
+> `customSkillDirs`（方式 C）与方式 A/B 的差别：它以 rank 300 注册**技能根目录**，因此可以直接指向 `<plugin>/skills`（无需逐技能建联接），适合把技能目录与工作区解耦。
 
 ## 方式 C：以 dsh 插件方式绑定（`customSkillDirs`）
 
@@ -91,7 +107,7 @@ New-Item -ItemType Junction -Path "$env:USERPROFILE\.dsh\skills\resume-job-searc
 
 | 现象 | 原因与处理 |
 |---|---|
-| 技能一个都没出现 | 检查是否把 `SKILL.md` 放深了一层（必须 `<根>/<技能名>/SKILL.md`） |
+| 技能一个都没出现 | 两个常见原因：① 把整个 `skills/` 目录链成一层（`<根>/<某名>/skills/<技能>/SKILL.md`），`SKILL.md` 深了两层，必须**逐技能建联接**或改用方式 C；② `SKILL.md` 本身放深了一层，必须 `<根>/<技能名>/SKILL.md` |
 | 只缺少某一个技能 | 该文件的 frontmatter `name` 不是 kebab-case、`description` 为空，或写了 DSH 不认识的 `allowed-tools`；DSH 会静默跳过，用 `scripts/validate-skills.mjs` 定位 |
 | 技能文件带 BOM 后消失 | **高频坑**：用 PowerShell 5.1 的 `Set-Content -Encoding UTF8`、或某些 Windows 编辑器保存，会写入 UTF-8 BOM，导致文件不再以 `---` 开头、frontmatter 解析失败。请另存为「UTF-8 无 BOM」；`scripts/validate-skills.mjs` 与 `scripts/privacy-scan.mjs` 都会直接报出该问题 |
 | 改了文件但不生效 | 正文编辑下次加载生效；frontmatter/新增文件由监视器捕获，必要时新开会话 |
