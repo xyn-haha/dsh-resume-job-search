@@ -27,11 +27,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YOUR-USERNAME/dsh-resume-job-search.git"
+    "url": "git+https://github.com/xyn-haha/dsh-resume-job-search.git"
   },
-  "homepage": "https://github.com/YOUR-USERNAME/dsh-resume-job-search",
+  "homepage": "https://github.com/xyn-haha/dsh-resume-job-search",
   "bugs": {
-    "url": "https://github.com/YOUR-USERNAME/dsh-resume-job-search/issues"
+    "url": "https://github.com/xyn-haha/dsh-resume-job-search/issues"
   },
   "files": [
     "lib",

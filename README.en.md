@@ -4,7 +4,7 @@
 >
 > 中文: [README.md](README.md)
 
-[![validate](https://github.com/YOUR-USERNAME/dsh-resume-job-search/actions/workflows/validate.yml/badge.svg)](https://github.com/YOUR-USERNAME/dsh-resume-job-search/actions/workflows/validate.yml)
+[![validate](https://github.com/xyn-haha/dsh-resume-job-search/actions/workflows/validate.yml/badge.svg)](https://github.com/xyn-haha/dsh-resume-job-search/actions/workflows/validate.yml)
 ![skills](https://img.shields.io/badge/skills-8-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
 
@@ -45,7 +45,7 @@ This plugin turns that into 8 skills and a fixed pipeline: **fact base → job i
 DSH scans only the first level of a skills root, so link **each skill directory** (the loop below does it):
 
 ```powershell
-git clone https://github.com/YOUR-USERNAME/dsh-resume-job-search.git D:\dsh-plugins\dsh-resume-job-search
+git clone https://github.com/xyn-haha/dsh-resume-job-search.git D:\dsh-plugins\dsh-resume-job-search
 $plugin = 'D:\dsh-plugins\dsh-resume-job-search'; $root = 'D:\your-workspace\.dsh\skills'
 New-Item -ItemType Directory -Force -Path $root | Out-Null
 Get-ChildItem -Directory "$plugin\skills" | ForEach-Object {
@@ -56,7 +56,7 @@ Get-ChildItem -Directory "$plugin\skills" | ForEach-Object {
 **Option B — user-level skills dir (all workspaces)**
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/dsh-resume-job-search.git ~/dsh-plugins/dsh-resume-job-search
+git clone https://github.com/xyn-haha/dsh-resume-job-search.git ~/dsh-plugins/dsh-resume-job-search
 mkdir -p ~/.dsh/skills
 for d in ~/dsh-plugins/dsh-resume-job-search/skills/*/; do ln -sfn "$d" ~/.dsh/skills/"$(basename "$d")"; done
 ```

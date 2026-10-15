@@ -4,7 +4,7 @@
 >
 > English: [README.en.md](README.en.md)
 
-[![validate](https://github.com/YOUR-USERNAME/dsh-resume-job-search/actions/workflows/validate.yml/badge.svg)](https://github.com/YOUR-USERNAME/dsh-resume-job-search/actions/workflows/validate.yml)
+[![validate](https://github.com/xyn-haha/dsh-resume-job-search/actions/workflows/validate.yml/badge.svg)](https://github.com/xyn-haha/dsh-resume-job-search/actions/workflows/validate.yml)
 ![skills](https://img.shields.io/badge/skills-8-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
 
@@ -62,7 +62,7 @@ dsh plugin --profile web add file:/绝对路径/dsh-resume-job-search-0.2.0.tgz
 DSH 只扫描技能根目录的第一层，所以要**为每个技能建一个联接**（脚本会自动处理）：
 
 ```powershell
-git clone https://github.com/YOUR-USERNAME/dsh-resume-job-search.git D:\dsh-plugins\dsh-resume-job-search
+git clone https://github.com/xyn-haha/dsh-resume-job-search.git D:\dsh-plugins\dsh-resume-job-search
 $plugin = 'D:\dsh-plugins\dsh-resume-job-search'; $root = 'D:\你的工作区\.dsh\skills'
 New-Item -ItemType Directory -Force -Path $root | Out-Null
 Get-ChildItem -Directory "$plugin\skills" | ForEach-Object {
@@ -73,7 +73,7 @@ Get-ChildItem -Directory "$plugin\skills" | ForEach-Object {
 **方式 C：接入用户级技能目录（全工作区可用，无需装插件）**
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/dsh-resume-job-search.git ~/dsh-plugins/dsh-resume-job-search
+git clone https://github.com/xyn-haha/dsh-resume-job-search.git ~/dsh-plugins/dsh-resume-job-search
 mkdir -p ~/.dsh/skills
 for d in ~/dsh-plugins/dsh-resume-job-search/skills/*/; do ln -sfn "$d" ~/.dsh/skills/"$(basename "$d")"; done
 ```
@@ -134,13 +134,12 @@ dsh-resume-job-search/
 
 ## 发布到 GitHub 前的检查清单
 
-1. 把仓库里所有占位符替换成你的信息：
-   - `package.json` 的 `repository.url` / `homepage` / `bugs.url` 中的 `YOUR-USERNAME`；
-   - `README.md`、`README.en.md`、`docs/INSTALL.en.md`、`INSTALL.md` 里的克隆地址；
-   - `LICENSE` 顶部的版权所有者（衍生来源声明已写好，不要删）。
+仓库信息已按 `xyn-haha/dsh-resume-job-search` 填好（`package.json` 的 repository/homepage/bugs、README 与 INSTALL 的克隆地址、CI 徽章、LICENSE 版权行）。剩余要做的是：
+
+1. 在 GitHub 建**公开仓库**，名字建议就用 `dsh-resume-job-search`（与 `package.json` 里的地址一致；若用别的名字，记得同步改 `package.json`、README、README.en.md、`docs/INSTALL.en.md`、`INSTALL.md` 里的地址）。
 2. 本地跑一次全套检查：`npm test`；装了 DSH 的机器再跑 `npm run test:integration`。
 3. 确认 `git status` 里没有 `config/`、`cv/`、`cover_letters/`、`job_scraper/`、`gap-plans/`、`job_search_tracker.csv` 等个人数据（`.gitignore` 已默认排除，仅保留模板）。
-4. 建仓库并推送，确保 GitHub Actions 的 `validate-skills` 工作流为绿（三项检查）。
+4. 推送后确认 GitHub Actions 的 `validate-skills` 工作流为绿（技能契约 + 提供方测试 + 隐私扫描 + 集成测试）。徽章图片要等仓库真正存在、工作流跑过一次之后才会显示。
 5. 打标签发布：`git tag v0.2.0 && git push --tags`，并在 Release 里粘贴 `CHANGELOG.md` 的对应段落。
 6. 若还要发到 npm：`npm publish`（`publishConfig.access = public` 已就绪），用户的安装方式即为 `dsh plugin --profile web add dsh-resume-job-search`。
 
