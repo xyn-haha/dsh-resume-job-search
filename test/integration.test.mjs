@@ -41,6 +41,7 @@ if (modulesDir === undefined) {
 const { SkillRegistry } = await import(pathToFileURL(join(modulesDir, 'dsh-skill', 'lib', 'index.js')).href);
 const { Context } = await import(pathToFileURL(join(modulesDir, 'cordis', 'lib', 'index.js')).href);
 const plugin = await import(pathToFileURL(join(repoRoot, 'lib', 'index.js')).href);
+const skillApi = await import(pathToFileURL(join(modulesDir, 'dsh-skill', 'lib', 'index.js')).href);
 
 const failures = [];
 const check = (ok, message) => {
@@ -72,6 +73,22 @@ check(typeof definition?.content === 'string' && definition.content.length > 100
 check(definition?.provider === 'resume-job-search', `provider = ${definition?.provider}`);
 check(definition?.resourceBase?.kind === 'directory', `resourceBase = ${JSON.stringify(definition?.resourceBase)}`);
 
+console.log('\n2b) 与宿主一致的消费方式（曾在这里崩溃：invocation 缺失）');
+try {
+  const summaries = await ctx.skills.list({});
+  const invocable = summaries.filter(skillApi.isModelInvocable);
+  check(invocable.length === summaries.length, `isModelInvocable 过滤后仍为 ${invocable.length}/${summaries.length} 个技能`);
+  const rendered = skillApi.renderSkillContent({
+    name: definition.name,
+    provider: definition.provider,
+    resourceBase: definition.resourceBase,
+    content: definition.content,
+  });
+  check(rendered.includes('<skill_content') && rendered.includes('job-evaluation'), `renderSkillContent 产出 ${rendered.length} 字符的 <skill_content> 标记`);
+} catch (error) {
+  check(false, `宿主式消费抛错：${error.message}`);
+}
+
 console.log('\n3) 热更新：新增技能目录');
 const dir = mkdtempSync(join(tmpdir(), 'rjs-live-'));
 mkdirSync(join(dir, 'alpha'));
@@ -90,6 +107,40 @@ console.log('\n4) 热更新：正文改动后重新读取');
 appendFileSync(join(dir, 'alpha', 'SKILL.md'), '\n追加一行：热更新可见\n', 'utf8');
 const alpha = await liveCtx.skills.get('alpha', {});
 check(alpha?.content?.includes('热更新可见') === true, `重新 get() 拿到新增内容（${alpha?.content?.length ?? 0} 字符）`);
+
+console.log('\n5) 同名竞争：更低 rank 的提供方胜出（插件 rank 300 vs 内置目录 rank 100）');
+const competeDir = mkdtempSync(join(tmpdir(), 'rjs-rank-'));
+for (const name of ['project-one', 'plugin-two']) {
+  mkdirSync(join(competeDir, name));
+  writeFileSync(join(competeDir, name, 'SKILL.md'), `---\nname: ${name}\ndescription: rank 竞争测试 ${name}\n---\n# ${name}\n`, 'utf8');
+}
+const rankCtx = makeCtx();
+plugin.apply(rankCtx, { skillsDir: competeDir, quiet: true });
+// 再注册一个 rank 更低的提供方，声明同名技能，验证项目级优先
+const projectDefinition = {
+  name: 'project-one',
+  description: '来自 rank 100 的同名技能',
+  invocation: { modelInvocable: true, userInvocable: true },
+  source: 'project-dsh',
+  provider: 'project-like',
+  content: '# project-one（rank 100）\n',
+};
+rankCtx.skills.registerProvider(() => ({
+  name: 'project-like',
+  async list() {
+    const { content, ...summary } = projectDefinition;
+    return [{ ...summary, rank: 100, locator: { kind: 'memory' } }];
+  },
+  async get() {
+    return { ...projectDefinition };
+  },
+}));
+const summaries = await rankCtx.skills.list({});
+const winner = summaries.find((skill) => skill.name === 'project-one');
+check(winner?.provider === 'project-like', `同名技能由低 rank 提供方胜出（provider=${winner?.provider}）`);
+const winningBody = await rankCtx.skills.get('project-one', {});
+check(winningBody?.content?.includes('rank 100') === true, '胜出提供方的正文可加载');
+check((await readCatalog(rankCtx)).length === 2, '竞争后技能总数仍为 2（未被重复列出）');
 
 console.log(failures.length === 0 ? '\n全部通过。' : `\n失败 ${failures.length} 项`);
 process.exit(failures.length === 0 ? 0 : 1);

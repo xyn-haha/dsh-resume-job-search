@@ -2,6 +2,20 @@
 
 本文件记录本插件的公开变更。版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [0.2.1] - 2026-10-15
+
+### 修复
+
+- **真机会话崩溃（0.2.0 引入）**：候选与定义缺少 `invocation` 调用策略，导致真实 DSH 会话在构建技能目录时抛 `Cannot read properties of undefined (reading 'modelInvocable')`，会话直接退出（`exit 1`）。原因是注册表把「候选 `invocation === undefined`」当作「默认允许」，但消费方（`isModelInvocable` / `isUserInvocable` / `snapshot.skills.filter(isModelInvocable)`）会直接读 `skill.invocation.modelInvocable`。现在候选与 `get()` 返回的定义都会显式带上 `{ modelInvocable: true, userInvocable: true }`。
+- 测试补上「与宿主一致的消费方式」用例（`isModelInvocable` 过滤 + `renderSkillContent` 渲染）与 `invocation` 字段断言，这类崩溃不会再漏到真机阶段。
+- 集成测试补充**同名技能竞争**用例：验证低 rank 提供方胜出且目录不重复列出（插件 rank 300 vs 项目级 rank 100）。
+
+### 文档
+
+- 安装文档补充两条真机经验：
+  1. 本地 `file:` 依赖在 pnpm 下是**硬链接复制**，改完插件源码必须刷新安装（重跑 `dsh plugin add ...` 或在该 profile 下 `pnpm install`），否则运行的是旧副本；
+  2. 插件提供方（rank 300）与工作区 `.dsh/skills`（rank 100）会同时存在，同名技能由项目级胜出，属于设计行为，不是重复加载。
+
 ## [0.2.0] - 2026-10-15
 
 ### 新增

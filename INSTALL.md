@@ -45,6 +45,32 @@ dsh --profile web --dump-config | grep resume-job-search            # macOS / Li
 
 > 侧载（未发布）时 package.json 的 `repository/homepage` 仍是占位地址，pnpm 不校验这些字段；功能不受影响。
 
+### 改了插件源码之后必须刷新安装
+
+用 `file:` 本地路径安装时，pnpm 是把包**硬链接复制**进 profile 的 `node_modules`，不是实时指向你的工作目录。所以**改完 `lib/index.js` 或 `skills/` 之后，运行中的副本还是旧的**，需要刷新一次：
+
+```bash
+# 方式一：重新 add 一次
+dsh plugin --profile web add file:D:/项目/简历编写与求职分析插件
+
+# 方式二：在 profile 目录里跑 pnpm
+cd ~/.dsh/profiles/web && pnpm install
+```
+
+自检：`grep -c DEFAULT_INVOCATION ~/.dsh/profiles/web/node_modules/dsh-resume-job-search/lib/index.js`（或直接在编辑器里看该文件是否为你最新的版本）。发布到 npm 之后不存在这个问题——`dsh plugin update` 会拉新版本。
+
+### 与工作区技能的共存关系
+
+如果你同时用形态 B/C 把技能接进了某个工作区，那么同名技能会出现在两处：
+
+| 来源 | rank | 谁胜出 |
+|---|---|---|
+| 工作区 `.dsh/skills` / `.agents/skills` | 100 / 200 | ✅ 项目级优先 |
+| 本插件提供方 | 300 | 项目级存在时被覆盖 |
+| 用户级 `~/.dsh/skills` | 400 | 插件优先 |
+
+这是注册表的按 rank 去重行为（有集成测试覆盖），**不是重复加载**，也不会有内容串味。如果你只想用插件这一套，把工作区的 `.dsh/skills` 联接删掉即可，避免以后自己搞不清技能来自哪。
+
 ---
 
 ## 形态 B/C/D：只用技能目录

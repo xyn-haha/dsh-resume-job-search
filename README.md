@@ -140,7 +140,7 @@ dsh-resume-job-search/
 2. 本地跑一次全套检查：`npm test`；装了 DSH 的机器再跑 `npm run test:integration`。
 3. 确认 `git status` 里没有 `config/`、`cv/`、`cover_letters/`、`job_scraper/`、`gap-plans/`、`job_search_tracker.csv` 等个人数据（`.gitignore` 已默认排除，仅保留模板）。
 4. 推送后确认 GitHub Actions 的 `validate-skills` 工作流为绿（技能契约 + 提供方测试 + 隐私扫描 + 集成测试）。徽章图片要等仓库真正存在、工作流跑过一次之后才会显示。
-5. 打标签发布：`git tag v0.2.0 && git push --tags`，并在 Release 里粘贴 `CHANGELOG.md` 的对应段落。
+5. 打标签发布：`git tag v0.2.1 && git push --tags`，并在 Release 里粘贴 `CHANGELOG.md` 的对应段落。
 6. 若还要发到 npm：`npm publish`（`publishConfig.access = public` 已就绪），用户的安装方式即为 `dsh plugin --profile web add dsh-resume-job-search`。
 
 ## 参与贡献

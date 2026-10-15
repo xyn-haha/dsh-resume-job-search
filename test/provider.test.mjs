@@ -66,6 +66,10 @@ for (const candidate of candidates) {
   if (!KEBAB.test(candidate.name)) problems.push('name 非 kebab-case');
   if (typeof candidate.description !== 'string' || candidate.description.length === 0) problems.push('description 缺失');
   if (candidate.whenToUse !== undefined && typeof candidate.whenToUse !== 'string') problems.push('whenToUse 非字符串');
+  // invocation 必须显式给出：消费方（isModelInvocable 等）直接读 skill.invocation.modelInvocable
+  if (candidate.invocation?.modelInvocable !== true || candidate.invocation?.userInvocable !== true) {
+    problems.push('invocation 缺失或不是 { modelInvocable: true, userInvocable: true }');
+  }
   if (typeof candidate.source !== 'string') problems.push('source 非字符串');
   if (!Number.isFinite(candidate.rank)) problems.push('rank 非法');
   if (candidate.provider !== provider.name) problems.push('provider 与提供方名不一致');
@@ -83,6 +87,8 @@ for (const candidate of candidates) {
       definition.name === candidate.name &&
       definition.provider === provider.name &&
       definition.source === candidate.source &&
+      definition.invocation?.modelInvocable === true &&
+      definition.invocation?.userInvocable === true &&
       definition.resourceBase?.kind === 'directory' &&
       typeof definition.resourceBase.path === 'string',
     `${candidate.name.padEnd(22)} content=${definition?.content?.length ?? 0} 字符`,
