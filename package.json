@@ -1,0 +1,60 @@
+{
+  "name": "dsh-resume-job-search",
+  "version": "0.1.0",
+  "private": false,
+  "description": "DSH（DeepSeek Harness）插件：简历编写与求职分析。岗位情报→匹配度评估→简历改写→求职信→面试准备→投递台账的端到端技能集（skills-only，无运行时代码）。",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "deepseek",
+    "harness",
+    "dsh",
+    "dsh-plugin",
+    "dsh-skill",
+    "resume",
+    "cv",
+    "cover-letter",
+    "job-search",
+    "interview-prep",
+    "简历",
+    "求职"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR-USERNAME/dsh-resume-job-search.git"
+  },
+  "homepage": "https://github.com/YOUR-USERNAME/dsh-resume-job-search",
+  "bugs": {
+    "url": "https://github.com/YOUR-USERNAME/dsh-resume-job-search/issues"
+  },
+  "files": [
+    "skills",
+    "templates",
+    "cordis.patch.yml",
+    "README.md",
+    "README.en.md",
+    "INSTALL.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "validate": "node scripts/validate-skills.mjs",
+    "privacy": "node scripts/privacy-scan.mjs",
+    "test": "node scripts/validate-skills.mjs && node scripts/privacy-scan.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "skills": {
+      "dir": "skills"
+    },
+    "displayName": "简历编写与求职分析"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

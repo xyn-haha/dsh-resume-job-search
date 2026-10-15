@@ -1,0 +1,30 @@
+# 个人资料与产出：不要提交到 GitHub
+# 注意：这些模式锚定在仓库根目录（以 / 开头），否则会连 templates/ 下的同名样板目录一起排除
+/config/
+/cv/
+/cover_letters/
+/job_scraper/
+/gap-plans/
+/job_search_tracker.csv
+
+# 但保留样板与模板
+!templates/
+!skills/job-search-intel/job_search_tracker.csv
+
+# Node
+node_modules/
+npm-debug.log*
+pnpm-debug.log*
+
+# 编辑器与系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 编译产物
+*.pdf
+*.docx
+*.aux
+*.log
+*.out

@@ -1,0 +1,12 @@
+# 统一换行，避免 Windows 提交后 diff 全红
+* text=auto eol=lf
+
+# Markdown 技能文件强制 LF
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+
+# CSV 保持原样，避免 Excel 打开异常
+*.csv text eol=lf

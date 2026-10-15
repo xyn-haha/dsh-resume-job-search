@@ -1,0 +1,2 @@
+AppliedDate,Company,Role,Source,Channel,Location,SalaryRange,Status,NextAction,ResumeFile,CoverLetterFile,Notes
+2026-04-20,示例科技有限公司,示例岗位（请替换）,https://example.com/job/00000,BOSS直聘,示例城市,示例区间（仅参考）,applied,YYYY-MM-DD 前跟进,resume_示例公司.md,cover_示例公司_示例岗位.md,"示例行，请替换或删除；Channel 取值：BOSS直聘/猎聘/智联招聘/前程无忧/拉勾/实习僧/牛客网/公司官网/公众号/GitHub招聘帖"

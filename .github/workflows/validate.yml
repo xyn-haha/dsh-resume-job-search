@@ -1,0 +1,23 @@
+name: validate-skills
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 校验 SKILL.md 是否符合 DSH 技能契约
+        run: node scripts/validate-skills.mjs
+
+      - name: 隐私扫描（真实邮箱 / 手机号 / 身份证号）
+        run: node scripts/privacy-scan.mjs
