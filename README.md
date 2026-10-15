@@ -162,16 +162,38 @@ dsh-resume-job-search/
 └─ .github/workflows/           CI：契约校验 + 提供方测试 + 隐私扫描 + 集成测试
 ```
 
-## 发布到 GitHub 前的检查清单
+## 仓库现状与维护
 
-仓库信息已按 `xyn-haha/dsh-resume-job-search` 填好（`package.json` 的 repository/homepage/bugs、README 与 INSTALL 的克隆地址、CI 徽章、LICENSE 版权行）。剩余要做的是：
+**已发布**：https://github.com/xyn-haha/dsh-resume-job-search （公开，MIT 许可，GitHub 已正确识别）
 
-1. 在 GitHub 建**公开仓库**，名字建议就用 `dsh-resume-job-search`（与 `package.json` 里的地址一致；若用别的名字，记得同步改 `package.json`、README、README.en.md、`docs/INSTALL.en.md`、`INSTALL.md` 里的地址）。
-2. 本地跑一次全套检查：`npm test`；装了 DSH 的机器再跑 `npm run test:integration`。
-3. 确认 `git status` 里没有 `config/`、`cv/`、`cover_letters/`、`job_scraper/`、`gap-plans/`、`job_search_tracker.csv` 等个人数据（`.gitignore` 已默认排除，仅保留模板）。
-4. 推送后确认 GitHub Actions 的 `validate-skills` 工作流为绿（技能契约 + 提供方测试 + 隐私扫描 + 集成测试）。徽章图片要等仓库真正存在、工作流跑过一次之后才会显示。
-5. 打标签发布：`git tag v0.3.0 && git push --tags`，并在 Release 里粘贴 `CHANGELOG.md` 的对应段落。
-6. 若还要发到 npm：`npm publish`（`publishConfig.access = public` 已就绪），用户的安装方式即为 `dsh plugin --profile web add dsh-resume-job-search`。
+| 项目 | 现状 |
+|---|---|
+| 分支 / 标签 | `main` / `v0.3.3` |
+| 提交归属 | 全部提交作者为仓库主人（GitHub 账号 `xyn-haha`） |
+| 许可证 | MIT（`LICENSE` 为逐字标准文本，衍生声明在 `THIRD-PARTY-NOTICES.md`） |
+| CI | `.github/workflows/validate.yml`：技能契约校验 → 提供方契约测试 → 隐私扫描 → 真机集成测试（无 DSH 环境自动跳过） |
+| 文件数 | 35 个（8 个技能 + 运行时入口 + 检索 CLI + 测试 + 文档 + 工作区样板） |
+
+### 日常维护怎么做
+
+1. 改技能或代码后，本地先跑：`npm test`；装了 DSH 的机器再跑 `npm run test:integration`。
+2. 提交前确认没有把私人数据带进来：`git status` 不应出现 `workspace/`、`config/`、`cv/`、`cover_letters/`、`job_scraper/`、`gap-plans/`、`job_search_tracker.csv`（`.gitignore` 已排除，隐私扫描也会拦）。
+3. 发布新版本：更新 `CHANGELOG.md` 与 `package.json` 的 `version`，提交后 `git tag vX.Y.Z && git push --tags`，并把 CHANGELOG 对应段落粘进 Release 说明。
+4. 只想更新仓库内容：`git push` 即可；**若历史被改写**（例如修正作者归属），必须用 `git push --force origin main` 并同步重建标签。
+5. 网络提示：本机若遇 `schannel: failed to receive handshake`，改用 OpenSSL 后端即可——
+   `git config --global http.sslBackend openssl`。
+
+### 可选：发布到 npm
+
+`package.json` 已就绪（`publishConfig.access = public`、`main`、`exports`、`dsh.bundle.patch`）。执行 `npm publish` 后，用户安装方式简化为：
+
+```bash
+dsh plugin --profile web add dsh-resume-job-search
+```
+
+### 可选：完善仓库门面
+
+在 GitHub 仓库页 About 区填写 Description 与 Topics（主题建议：`dsh`、`dsh-plugin`、`deepseek-harness`、`resume`、`cover-letter`、`job-search`、`interview-prep`、`ai-agent`），可提升可发现性。
 
 ## 参与贡献
 
