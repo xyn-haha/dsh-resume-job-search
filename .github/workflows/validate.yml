@@ -19,5 +19,11 @@ jobs:
       - name: 校验 SKILL.md 是否符合 DSH 技能契约
         run: node scripts/validate-skills.mjs
 
+      - name: 插件提供方契约测试（mock ctx.skills）
+        run: node test/provider.test.mjs
+
       - name: 隐私扫描（真实邮箱 / 手机号 / 身份证号）
         run: node scripts/privacy-scan.mjs
+
+      - name: 真机集成测试（未安装 DSH 时自动跳过）
+        run: node test/integration.test.mjs

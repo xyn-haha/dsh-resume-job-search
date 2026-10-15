@@ -2,7 +2,23 @@
 
 本文件记录本插件的公开变更。版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
-## [Unreleased]
+## [0.2.0] - 2026-10-15
+
+### 新增
+
+- **运行时入口 `lib/index.js`：本仓库从「纯技能目录」升级为真正的 dsh 插件包。**
+  - 在 `apply(ctx)` 中通过 `ctx.skills.registerProvider(...)` 注册自实现的技能提供方，扫描包内 `skills/`；用户 `dsh plugin add` 后即生效，不再需要逐技能建联接或改 `customSkillDirs`。
+  - 提供方实现注册表要求的 `list()` / `get()`，并给出 `resourceBase`（目录型）供技能内相对路径解析。
+  - 自建文件监视：优先整树递归，平台不支持时回退到「技能根目录 + 每个技能目录」深度 1；技能文件增删改触发缓存失效，实现热更新。
+  - 零运行时依赖：frontmatter 用内置极简解析器（本插件 SKILL.md 只用到 name / description / whenToUse / metadata）。
+- `cordis.patch.yml` 改为 bundle patch（`insert: [{ id: resume-job-search, name: dsh-resume-job-search }]`）；`package.json` 增加 `dsh.bundle.patch` / `main` / `exports`，版本升到 0.2.0。
+- 测试：`test/provider.test.mjs`（mock ctx，按注册表校验规则检查候选、正文加载、热更新、容错）与 `test/integration.test.mjs`（用真实 `@deepseek-ai/dsh-skill` + `@deepseek-ai/cordis` 驱动，未安装 DSH 时自动跳过）；CI 增加这两个步骤。
+- 许可合规：`THIRD-PARTY-NOTICES.md` 记录上游 `ai-job-search`（MIT，Copyright (c) 2026 Mads Lorentzen）被使用的部分与本仓库的全部改动；`LICENSE` 增加衍生来源声明；README 致谢写入具体作者与许可。
+
+### 变更
+
+- `scripts/validate-skills.mjs` 支持 `SKILLS_DIR` 环境变量指定技能目录，便于测试。
+- 安装文档重构为「插件形态 A ~ E」，补充 `dsh plugin add` 的安装、验证与卸载流程。
 
 ### 修复
 
@@ -12,7 +28,8 @@
 
 ### 文档
 
-- 安装说明修正为**逐技能建联接**：把整个 `skills/` 目录链成一层会让 `SKILL.md` 深两层，DSH 只扫描技能根目录第一层，因此技能不会被发现。三种方式（工作区逐技能联接 / 用户级逐技能联接 / `customSkillDirs` 直指技能根）均已给出可直接执行的脚本，并在排错清单中补充该现象与 BOM 现象。
+- 安装说明修正为**逐技能建联接**：把整个 `skills/` 目录链成一层会让 `SKILL.md` 深两层，DSH 只扫描技能根目录第一层，因此技能不会被发现。
+- 排错清单补充「深层链接」与「BOM」两个高频坑。
 
 ## [0.1.0] - 2026-10-15
 

@@ -1,20 +1,9 @@
-# dsh bundle patch：把本插件的技能目录接入 DSH 的技能发现链。
+# dsh bundle patch：把本插件作为一层插入 profile 的插件栈。
 #
-# 说明：本插件是 skills-only（纯 Markdown 技能），没有运行时代码。
-# DSH 的技能由 `@deepseek-ai/dsh-skill-filesystem` 提供方扫描根目录发现。
-# 这里做两件事：
-#   1. 确保技能提供方已加载；
-#   2. 把本插件的 `skills/` 目录注册进 customSkillDirs（rank 300）。
-#
-# 安装前请把 `<PLUGIN_DIR>` 换成你克隆本仓库的绝对路径，例如：
-#   Windows: D:\\dsh-plugins\\dsh-resume-job-search
-#   macOS/Linux: /Users/you/dsh-plugins/dsh-resume-job-search
-#
-# 也可以不改本文件，改为在 $DSH_HOME/profiles/<profile>/cordis.patch.yml 里
-# 覆盖同一字段（见 INSTALL.md 的方式 C）。
-
-- id: skill-filesystem
-  name: '@deepseek-ai/dsh-skill-filesystem'
-  config:
-    customSkillDirs:
-      - '<PLUGIN_DIR>/skills'
+# 被 `dsh plugin --profile <profile> add <本包>` 安装后，本文件由 profile 的
+# bundle 机制自动加载：下面的 insert 让 loader 实例化本包的入口模块
+# （package.json 的 main → lib/index.js），入口在 apply() 里把包内 skills/
+# 注册为技能提供方，无需用户手工建联接或改 customSkillDirs。
+- insert:
+    - id: resume-job-search
+      name: dsh-resume-job-search

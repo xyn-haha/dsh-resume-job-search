@@ -19,7 +19,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const skillsDir = join(root, 'skills');
+const skillsDir = join(root, process.env.SKILLS_DIR ?? 'skills');
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 const errors = [];

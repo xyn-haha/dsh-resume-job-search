@@ -40,9 +40,24 @@
 2. **先评估后写作**：拿到 JD 先出匹配度评分与结论，**等你确认**才生成材料；不确认不写。
 3. **产出必校验**：简历与求职信导出后逐页目视检查（跨页断行、标题孤行、超页、字号），有 `pdftotext` 时额外校验 ATS 文本层与联系方式是否可解析。
 
-## 安装（三种方式）
+## 安装（四种方式）
 
-**方式 A：接入某个工作区（最快）**
+**方式 A：装成 dsh 插件（推荐，最省事）**
+
+本仓库现在是**真正的 dsh 插件包**：入口 `lib/index.js` 实现技能提供方，安装后由 profile 的 bundle 机制自动加载，**不需要建联接、不需要改配置**。
+
+```bash
+# 从 npm 安装（发布后）
+dsh plugin --profile web add dsh-resume-job-search
+
+# 从本地目录或 tarball 安装（开发 / 未发布时）
+dsh plugin --profile web add file:/绝对路径/dsh-resume-job-search
+dsh plugin --profile web add file:/绝对路径/dsh-resume-job-search-0.2.0.tgz
+```
+
+装完重启 DSH 或新开会话即生效，8 个技能对所有工作区可用。
+
+**方式 B：接入某个工作区（不装插件时）**
 
 DSH 只扫描技能根目录的第一层，所以要**为每个技能建一个联接**（脚本会自动处理）：
 
@@ -55,7 +70,7 @@ Get-ChildItem -Directory "$plugin\skills" | ForEach-Object {
 }
 ```
 
-**方式 B：接入用户级技能目录（全工作区可用）**
+**方式 C：接入用户级技能目录（全工作区可用，无需装插件）**
 
 ```bash
 git clone https://github.com/YOUR-USERNAME/dsh-resume-job-search.git ~/dsh-plugins/dsh-resume-job-search
@@ -63,9 +78,9 @@ mkdir -p ~/.dsh/skills
 for d in ~/dsh-plugins/dsh-resume-job-search/skills/*/; do ln -sfn "$d" ~/.dsh/skills/"$(basename "$d")"; done
 ```
 
-**方式 C：用 `dsh` 插件方式绑定（`customSkillDirs`，无需逐技能联接）**
+**方式 D：`customSkillDirs` 精确挂载（技能目录与工作区解耦）**
 
-仓库自带 `cordis.patch.yml`。把其中的 `<PLUGIN_DIR>` 换成你的克隆路径，然后在 `$DSH_HOME/profiles/<profile>/cordis.patch.yml` 中引用该条目，或按 `dsh plugin` 方式安装。
+把仓库里 `cordis.patch.yml` 的 `<PLUGIN_DIR>` 换成你的克隆路径，再把该条目复制到 `$DSH_HOME/profiles/<profile>/cordis.patch.yml`。
 
 > 详细步骤、验证方法与排错清单见 [INSTALL.md](INSTALL.md)。
 
@@ -90,6 +105,9 @@ for d in ~/dsh-plugins/dsh-resume-job-search/skills/*/; do ln -sfn "$d" ~/.dsh/s
 
 ```
 dsh-resume-job-search/
+├─ lib/                         运行时入口（dsh 插件形态）
+│  ├─ index.js                  实现技能提供方：ctx.skills.registerProvider
+│  └─ README.md                 提供方契约、可选配置与已知限制
 ├─ skills/                      DSH 技能（每个目录一个 SKILL.md）
 │  ├─ resume-job-analysis/      入口工作流
 │  ├─ candidate-profile/        事实底本模板
@@ -102,12 +120,16 @@ dsh-resume-job-search/
 ├─ templates/                   工作区样板（复制到你的求职工作区）
 ├─ docs/                        English 安装指引 + 资料库填写示例
 ├─ scripts/
-│  ├─ validate-skills.mjs       技能契约校验
-│  └─ privacy-scan.mjs          隐私扫描（真实邮箱/手机号/身份证号）
-├─ cordis.patch.yml             以 dsh 插件方式绑定技能目录
-├─ package.json                 作为 dsh 插件包发布时的清单
+│  ├─ validate-skills.mjs       技能契约校验（支持 SKILLS_DIR 覆盖）
+│  └─ privacy-scan.mjs          隐私扫描（真实邮箱/手机号/身份证号/BOM）
+├─ test/
+│  ├─ provider.test.mjs         提供方契约测试（mock ctx）
+│  └─ integration.test.mjs      真实 SkillRegistry 集成测试（无 DSH 时跳过）
+├─ cordis.patch.yml             bundle patch：把本插件插入 profile 插件栈
+├─ package.json                 插件清单（dsh.bundle.patch / main / files）
+├─ THIRD-PARTY-NOTICES.md       上游内容与许可声明
 ├─ INSTALL.md / README.md       中文文档
-└─ .github/workflows/           CI：契约校验 + 隐私扫描
+└─ .github/workflows/           CI：契约校验 + 提供方测试 + 隐私扫描 + 集成测试
 ```
 
 ## 发布到 GitHub 前的检查清单
@@ -115,12 +137,12 @@ dsh-resume-job-search/
 1. 把仓库里所有占位符替换成你的信息：
    - `package.json` 的 `repository.url` / `homepage` / `bugs.url` 中的 `YOUR-USERNAME`；
    - `README.md`、`README.en.md`、`docs/INSTALL.en.md`、`INSTALL.md` 里的克隆地址；
-   - `LICENSE` 顶部的版权所有者；
-   - `cordis.patch.yml` 里的 `<PLUGIN_DIR>`（如果想让别人开箱即用，可改为文档说明由用户自行替换）。
-2. 本地跑一次全套检查：`npm test`（= 技能契约校验 + 隐私扫描）。
+   - `LICENSE` 顶部的版权所有者（衍生来源声明已写好，不要删）。
+2. 本地跑一次全套检查：`npm test`；装了 DSH 的机器再跑 `npm run test:integration`。
 3. 确认 `git status` 里没有 `config/`、`cv/`、`cover_letters/`、`job_scraper/`、`gap-plans/`、`job_search_tracker.csv` 等个人数据（`.gitignore` 已默认排除，仅保留模板）。
-4. 建仓库并推送，确保 GitHub Actions 的 `validate-skills` 工作流为绿。
-5. 打标签发布：`git tag v0.1.0 && git push --tags`，并在 Release 里粘贴 `CHANGELOG.md` 的对应段落。
+4. 建仓库并推送，确保 GitHub Actions 的 `validate-skills` 工作流为绿（三项检查）。
+5. 打标签发布：`git tag v0.2.0 && git push --tags`，并在 Release 里粘贴 `CHANGELOG.md` 的对应段落。
+6. 若还要发到 npm：`npm publish`（`publishConfig.access = public` 已就绪），用户的安装方式即为 `dsh plugin --profile web add dsh-resume-job-search`。
 
 ## 参与贡献
 

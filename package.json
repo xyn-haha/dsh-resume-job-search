@@ -1,9 +1,15 @@
 {
   "name": "dsh-resume-job-search",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": false,
-  "description": "DSH（DeepSeek Harness）插件：简历编写与求职分析。岗位情报→匹配度评估→简历改写→求职信→面试准备→投递台账的端到端技能集（skills-only，无运行时代码）。",
+  "description": "DSH（DeepSeek Harness）插件：简历编写与求职分析。以技能提供方注册 8 个 SKILL.md，覆盖岗位情报→匹配度评估→简历改写→求职信→面试准备→投递台账。",
   "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json",
+    "./cordis.patch.yml": "./cordis.patch.yml"
+  },
   "license": "MIT",
   "keywords": [
     "deepseek",
@@ -28,18 +34,22 @@
     "url": "https://github.com/YOUR-USERNAME/dsh-resume-job-search/issues"
   },
   "files": [
+    "lib",
     "skills",
     "templates",
     "cordis.patch.yml",
     "README.md",
     "README.en.md",
     "INSTALL.md",
-    "LICENSE"
+    "CHANGELOG.md",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
   ],
   "scripts": {
     "validate": "node scripts/validate-skills.mjs",
     "privacy": "node scripts/privacy-scan.mjs",
-    "test": "node scripts/validate-skills.mjs && node scripts/privacy-scan.mjs"
+    "test": "node scripts/validate-skills.mjs && node scripts/privacy-scan.mjs && node test/provider.test.mjs",
+    "test:integration": "node test/integration.test.mjs"
   },
   "engines": {
     "node": ">=20"
