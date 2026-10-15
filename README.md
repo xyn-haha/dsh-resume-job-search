@@ -95,6 +95,34 @@ for d in ~/dsh-plugins/dsh-resume-job-search/skills/*/; do ln -sfn "$d" ~/.dsh/s
 5. **「帮我准备面试」** → 轮次预判、STAR 骨架、反问清单。
 6. 投递后：**「更新台账」** → 记录状态与下一步跟进时间。
 
+## 本地岗位检索（jobfetch）
+
+插件自带一个本地岗位检索 CLI，把「找岗位」变成可复跑、可去重的一步（等价于原 Claude Code 版插件的 portal-search CLI）：
+
+```bash
+# 在插件仓库目录下执行；--state 指向你自己的求职工作区，避免把岗位记录混进仓库
+node lib/jobfetch.mjs search --city 南京 --limit 12 \
+  --keywords 安全,渗透测试,安全服务,网络安全 \
+  --state <你的工作区>/job_scraper/seen_jobs.json
+```
+
+**三步工作法**：
+
+1. **检索**：跑上面的命令，得到「已去过重的新岗位」表格（岗位 / 城市 / 日薪 / 时长 / 毕业要求 / 链接），同时把结果写进 `seen_jobs.json`；
+2. **复跑**：同一命令再跑一次，见过的岗位自动跳过（只抓新岗位，省时间也不重复打扰平台）；
+3. **评估**：挑其中感兴趣的，把 JD 贴给 DSH 说「评估这个岗位」→ 进入五维评分 → 确认后定向改简历与求职信。
+
+**渠道认可度（实测，2026-10）**：
+
+| 渠道 | 本地 CLI 能否匿名检索 | 说明 |
+|---|---|---|
+| 牛客网 | ✅ | 列表用无头浏览器渲染取岗位 ID，详情页解析内嵌 JSON |
+| BOSS直聘 / 猎聘 / 智联 / 前程无忧 / 实习僧 | ❌ | 列表数据在登录墙后，命令行走不通；请人工浏览，把 JD 贴给 DSH 评估 |
+| 高校就业网 / 公司官网招聘页 | ✅（待扩展） | 多为静态页，后续按需接入 |
+
+**前置条件与限制**：需要 Node ≥ 20 与 Edge/Chrome（用于渲染列表页，可用环境变量 `EDGE_PATH` 指定路径）；牛客网列表接口目前**不按关键词过滤**，结果里会混入非目标岗位，需要人工或 `quickFit` 粗筛；每次详情抓取间隔 1.5 秒，不做高频请求。完整说明见 [`lib/JOBFETCH.md`](lib/JOBFETCH.md)。
+
+
 ## 隐私设计
 
 - 本仓库**不含任何个人数据**：技能里的姓名、学校、项目、竞赛一律是 `<姓名>` `<项目名>` 这类占位符。
@@ -105,9 +133,11 @@ for d in ~/dsh-plugins/dsh-resume-job-search/skills/*/; do ln -sfn "$d" ~/.dsh/s
 
 ```
 dsh-resume-job-search/
-├─ lib/                         运行时入口（dsh 插件形态）
+├─ lib/                         运行时入口与本地工具
 │  ├─ index.js                  实现技能提供方：ctx.skills.registerProvider
-│  └─ README.md                 提供方契约、可选配置与已知限制
+│  ├─ README.md                 提供方契约、可选配置与已知限制
+│  ├─ jobfetch.mjs              本地岗位检索 CLI（检索→去重→速评→落盘）
+│  └─ JOBFETCH.md               jobfetch 用法与渠道能力矩阵
 ├─ skills/                      DSH 技能（每个目录一个 SKILL.md）
 │  ├─ resume-job-analysis/      入口工作流
 │  ├─ candidate-profile/        事实底本模板
@@ -140,7 +170,7 @@ dsh-resume-job-search/
 2. 本地跑一次全套检查：`npm test`；装了 DSH 的机器再跑 `npm run test:integration`。
 3. 确认 `git status` 里没有 `config/`、`cv/`、`cover_letters/`、`job_scraper/`、`gap-plans/`、`job_search_tracker.csv` 等个人数据（`.gitignore` 已默认排除，仅保留模板）。
 4. 推送后确认 GitHub Actions 的 `validate-skills` 工作流为绿（技能契约 + 提供方测试 + 隐私扫描 + 集成测试）。徽章图片要等仓库真正存在、工作流跑过一次之后才会显示。
-5. 打标签发布：`git tag v0.2.1 && git push --tags`，并在 Release 里粘贴 `CHANGELOG.md` 的对应段落。
+5. 打标签发布：`git tag v0.3.0 && git push --tags`，并在 Release 里粘贴 `CHANGELOG.md` 的对应段落。
 6. 若还要发到 npm：`npm publish`（`publishConfig.access = public` 已就绪），用户的安装方式即为 `dsh plugin --profile web add dsh-resume-job-search`。
 
 ## 参与贡献

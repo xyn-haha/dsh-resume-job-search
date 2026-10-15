@@ -2,6 +2,24 @@
 
 本文件记录本插件的公开变更。版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [0.3.0] - 2026-10-15
+
+### 新增
+
+- **本地岗位检索 CLI `lib/jobfetch.mjs`**（等价于原 Claude Code 版插件的 portal-search CLI）：
+  - 流程：检索 → 抓详情 → 去重（`seen_jobs.json` 状态机）→ 粗筛速评 → 落盘，支持 markdown 表格与 `--json` 输出；
+  - 渠道实现（牛客网）：列表页用 Edge/Chrome 无头渲染（`--dump-dom`）取岗位 ID，详情页解析内嵌 `__INITIAL_STATE__` JSON，产出岗位名、城市、薪资、时长、毕业年份、截止时间、关键词与要求正文；
+  - 模块化设计：新渠道只需实现 `{ name, label, searchIds, fetchDetail }`，其余流程复用；
+  - 节流：详情间隔 1.5 秒、关键词间隔 1.5 秒，单次抓取量受 `--limit` 约束，不做高频请求。
+- 文档 `lib/JOBFETCH.md`：用法、参数、三步工作法、**渠道能力矩阵**（实测）与已知限制。
+- README 增加「本地岗位检索（jobfetch）」章节与三步工作法；`INSTALL.md` 增加环境要求表（Node/Edge 依赖与降级行为）。
+- `job-search-intel` 技能把「本地检索 CLI」列为检索机制首选项，写入实际命令、调用纪律与实测限制。
+- `package.json` 增加 `npm run jobfetch` 脚本入口。
+
+### 变更
+
+- `scripts/privacy-scan.mjs` 跳过 `workspace/` 目录：该目录是用户私人求职工作区（已由 `.gitignore` 排除，不进仓库），其中本来就包含手机号、邮箱与简历，不应被当作「待提交内容」误报。扫描范围仍覆盖 `skills/`、`lib/`、`templates/`、`docs/` 与根目录文档。
+
 ## [0.2.1] - 2026-10-15
 
 ### 修复

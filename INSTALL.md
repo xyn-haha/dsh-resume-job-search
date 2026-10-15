@@ -9,6 +9,17 @@
 
 两种形态的技能内容完全相同（同一份 `skills/`），只是「谁来把它们喂给注册表」不同。
 
+## 环境要求
+
+| 组件 | 要求 | 说明 |
+|---|---|---|
+| Node.js | ≥ 20 | 插件入口与本地工具都用 ESM，无需构建 |
+| dsh | 已安装并可启动 profile | 插件形态由 profile 的 bundle 机制加载 |
+| pnpm | 仅在用 `dsh plugin add` 时 | `dsh plugin` 本质是 pnpm 转发器 |
+| Edge 或 Chrome | **仅本地岗位检索（jobfetch）需要** | 用于渲染需要 JS 的招聘列表页；路径可用 `EDGE_PATH` 指定，未安装时该功能自动不可用（技能会降级为联网搜索） |
+
+> 岗位检索的渠道能力与限制见 [`lib/JOBFETCH.md`](lib/JOBFETCH.md)：牛客网可匿名检索，BOSS直聘/猎聘/智联/前程无忧/实习僧 在登录墙后，需人工浏览后把 JD 交给 DSH 评估。
+
 ---
 
 ## 形态 A：装成 dsh 插件（推荐）

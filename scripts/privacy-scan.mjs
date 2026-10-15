@@ -19,8 +19,12 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 /** 需要扫描的文本类型 */
 const TEXT_EXT = new Set(['.md', '.yml', '.yaml', '.json', '.mjs', '.js', '.csv', '.txt']);
-/** 跳过目录 */
-const SKIP_DIRS = new Set(['.git', 'node_modules', '.github']);
+/**
+ * 跳过目录。
+ * workspace/ 是用户自己的私人求职工作区（已由 .gitignore 排除，不进仓库），
+ * 里面本来就该有手机号、邮箱、简历等个人数据，不属于「待提交内容」。
+ */
+const SKIP_DIRS = new Set(['.git', 'node_modules', '.github', 'workspace']);
 
 const ALLOWED_EMAIL_DOMAINS = new Set([
   'example.com',
