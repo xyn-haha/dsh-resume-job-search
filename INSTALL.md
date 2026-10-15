@@ -71,6 +71,16 @@ cd ~/.dsh/profiles/web && pnpm install
 
 这是注册表的按 rank 去重行为（有集成测试覆盖），**不是重复加载**，也不会有内容串味。如果你只想用插件这一套，把工作区的 `.dsh/skills` 联接删掉即可，避免以后自己搞不清技能来自哪。
 
+### 撤掉工作区联接后如何确认「插件真的在供货」
+
+工作区联接删掉后，工作区技能目录变成空目录（正常），此时加载任一技能，DSH 返回的技能基址应指向安装位置：
+
+```
+Base directory for this skill: <用户目录>\.dsh\profiles\<profile>\node_modules\dsh-resume-job-search\skills\<技能名>
+```
+
+而不是 `<工作区>\.dsh\skills\<技能名>`。看到前者就说明技能由插件提供方供货；这也是「插件对所有工作区生效」的直接证据（技能随 profile 走，与当前工作区无关）。
+
 ---
 
 ## 形态 B/C/D：只用技能目录
