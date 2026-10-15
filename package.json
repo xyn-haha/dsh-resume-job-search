@@ -1,6 +1,6 @@
 {
   "name": "dsh-resume-job-search",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": false,
   "description": "DSH（DeepSeek Harness）插件：简历编写与求职分析。以技能提供方注册 8 个 SKILL.md，覆盖岗位情报→匹配度评估→简历改写→求职信→面试准备→投递台账。",
   "type": "module",
